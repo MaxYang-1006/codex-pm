@@ -5,6 +5,9 @@ import { TaskScorer } from "./task-scorer.js";
 import { EnergyGate } from "./energy-gate.js";
 import { runRunOne, RunOneResult } from "../commands/run-one.js";
 import { ensureDirectoryExists } from "./file-utils.js";
+import { confirm } from "./interactive-prompt.js";
+import { RiskGate } from "./risk-gate.js";
+import type { CodexPmTask } from "../types/task.js";
 
 /**
  * 循环运行停止原因
@@ -54,12 +57,13 @@ export interface LoopRunnerOptions {
   stopOnHighRisk?: boolean;
   dryRun?: boolean;
   baseDir?: string;
+  interactive?: boolean;
 }
 
 const DEFAULT_OPTIONS: Required<
   Pick<
     LoopRunnerOptions,
-    "maxTasks" | "maxConsecutiveFailures" | "energyBudget" | "stopOnHighRisk" | "dryRun"
+    "maxTasks" | "maxConsecutiveFailures" | "energyBudget" | "stopOnHighRisk" | "dryRun" | "interactive"
   >
 > = {
   maxTasks: 5,
@@ -67,6 +71,7 @@ const DEFAULT_OPTIONS: Required<
   energyBudget: 500,
   stopOnHighRisk: true,
   dryRun: false,
+  interactive: false,
 };
 
 /**
@@ -82,7 +87,7 @@ export class LoopRunner {
   private options: Required<
     Pick<
       LoopRunnerOptions,
-      "maxTasks" | "maxConsecutiveFailures" | "energyBudget" | "stopOnHighRisk" | "dryRun"
+      "maxTasks" | "maxConsecutiveFailures" | "energyBudget" | "stopOnHighRisk" | "dryRun" | "interactive"
     >
   > & { baseDir?: string };
 
@@ -139,10 +144,23 @@ export class LoopRunner {
           break;
         }
 
-        // 检查高风险任务是否应该停止
-        if (this.options.stopOnHighRisk && (task.risk === "high" || task.risk === "critical")) {
-          stopReason = "high_risk_stopped";
-          break;
+        // 检查高风险任务
+        const isHighRisk = task.risk === "high" || task.risk === "critical";
+        if (isHighRisk) {
+          // 交互式模式下询问用户
+          if (this.options.interactive) {
+            const approved = await this.promptHighRiskApproval(task);
+            if (!approved) {
+              stopReason = "high_risk_stopped";
+              break;
+            }
+            // 用户批准后继续执行
+          } else if (this.options.stopOnHighRisk) {
+            // 非交互式且设置了停止，则停止
+            stopReason = "high_risk_stopped";
+            break;
+          }
+          // 如果 stopOnHighRisk 为 false 且非交互式，则直接继续（不安全但用户配置了）
         }
 
         // 检查能量预算
@@ -213,6 +231,49 @@ export class LoopRunner {
    */
   private async executeTask(taskId: string): Promise<RunOneResult> {
     return await runRunOne(taskId, this.options.dryRun);
+  }
+
+  /**
+   * 交互式询问用户是否批准高风险任务
+   */
+  private async promptHighRiskApproval(task: CodexPmTask): Promise<boolean> {
+    const riskGate = new RiskGate();
+    const riskResult = riskGate.evaluate(task);
+
+    const details: string[] = [];
+    details.push("");
+    details.push("⚠  HIGH RISK TASK DETECTED");
+    details.push("");
+    details.push(`  Task ID:   ${task.id}`);
+    details.push(`  Title:     ${task.title}`);
+    details.push(`  Risk:      ${task.risk} (${Math.round(riskResult.score * 100)}%)`);
+    details.push(`  Priority:  ${task.priority}`);
+    details.push(`  Size:      ${task.size}`);
+    details.push("");
+
+    if (riskResult.factors.length > 0) {
+      details.push("  Risk factors:");
+      for (const factor of riskResult.factors.slice(0, 5)) {
+        if (factor.contribution > 0) {
+          details.push(`    - ${factor.name}: ${factor.details}`);
+        }
+      }
+      details.push("");
+    }
+
+    if (task.description) {
+      details.push("  Description:");
+      details.push(`    ${task.description.substring(0, 150)}${task.description.length > 150 ? "..." : ""}`);
+      details.push("");
+    }
+
+    const approved = await confirm({
+      question: "Approve this high-risk task and continue?",
+      default: false,
+      details,
+    });
+
+    return approved;
   }
 
   /**

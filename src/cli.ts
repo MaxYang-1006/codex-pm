@@ -55,11 +55,13 @@ program
   .option("--dry-run", "write prompt but do not execute Codex")
   .option("--task <taskId>", "specific task ID to run")
   .option("--sandbox <mode>", "Codex sandbox mode: read-only or workspace-write", "workspace-write")
+  .option("-i, --interactive", "interactive mode: prompt for approval on high-risk tasks")
   .action(async options => {
     const result = await runRunOne({
       taskId: options.task,
       dryRun: options.dryRun,
       sandbox: options.sandbox,
+      interactive: options.interactive,
     });
     console.log(formatRunOneOutput(result));
   });
@@ -70,6 +72,7 @@ program
   .option("--max-tasks <number>", "Maximum number of tasks to run", "5")
   .option("--dry-run", "Write prompts but do not execute Codex")
   .option("--energy-budget <number>", "Energy budget limit", "500")
+  .option("-i, --interactive", "interactive mode: prompt for approval on high-risk tasks")
   .action(async options => {
     const maxTasks = parseInt(options.maxTasks, 10);
     const energyBudget = parseInt(options.energyBudget, 10);
@@ -77,6 +80,7 @@ program
       maxTasks,
       dryRun: options.dryRun,
       energyBudget,
+      interactive: options.interactive,
     });
     console.log(formatRunOutput(result));
   });

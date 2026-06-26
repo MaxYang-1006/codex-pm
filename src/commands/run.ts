@@ -15,6 +15,7 @@ export async function runRun(options: {
   mode?: string;
   dryRun?: boolean;
   energyBudget?: number;
+  interactive?: boolean;
 }): Promise<RunResult> {
   try {
     const runner = new LoopRunner({
@@ -23,6 +24,7 @@ export async function runRun(options: {
       energyBudget: options.energyBudget,
       stopOnHighRisk: true,
       maxConsecutiveFailures: 2,
+      interactive: options.interactive,
     });
 
     const report = await runner.run();

@@ -6,6 +6,7 @@ import { Verifier } from "../core/verifier.js";
 import { ResultWriter, ExecutionResult } from "../core/result-writer.js";
 import { RiskGate } from "../core/risk-gate.js";
 import { ensureDirectoryExists } from "../core/file-utils.js";
+import { confirm } from "../core/interactive-prompt.js";
 import type { CodexPmTask } from "../types/task.js";
 import type { VerificationResult } from "../types/state.js";
 import * as path from "path";
@@ -26,6 +27,7 @@ export interface RunOneOptions {
   baseDir?: string;
   sandbox?: CodexSandboxMode;
   codexExtraArgs?: string[];
+  interactive?: boolean;
 }
 
 export async function runRunOne(
@@ -33,7 +35,7 @@ export async function runRunOne(
   legacyDryRun: boolean = false
 ): Promise<RunOneResult> {
   const options = normalizeRunOneOptions(taskIdOrOptions, legacyDryRun);
-  const { taskId, dryRun, baseDir, sandbox, codexExtraArgs } = options;
+  const { taskId, dryRun, baseDir, sandbox, codexExtraArgs, interactive } = options;
   const manager = new StateManager(baseDir);
 
   if (!manager.isInitialized()) {
@@ -103,12 +105,26 @@ export async function runRunOne(
   const riskGate = new RiskGate();
   const riskGateResult = riskGate.canRun(selectedTask);
   if (!riskGateResult.allowed) {
-    return {
-      success: false,
-      message: `Risk gate blocked task execution: ${riskGateResult.reason}`,
-      task: selectedTask,
-      dryRun,
-    };
+    // 交互式模式下询问用户是否批准
+    if (interactive && !dryRun) {
+      const approved = await promptInteractiveApproval(selectedTask, riskGate);
+      if (!approved) {
+        return {
+          success: false,
+          message: "Task rejected by user in interactive mode",
+          task: selectedTask,
+          dryRun,
+        };
+      }
+      // 用户批准后继续执行
+    } else {
+      return {
+        success: false,
+        message: `Risk gate blocked task execution: ${riskGateResult.reason}`,
+        task: selectedTask,
+        dryRun,
+      };
+    }
   }
 
   // 构建 prompt
@@ -240,7 +256,7 @@ export async function runRunOne(
 function normalizeRunOneOptions(
   taskIdOrOptions?: string | RunOneOptions,
   legacyDryRun: boolean = false
-): Required<Pick<RunOneOptions, "dryRun" | "baseDir" | "sandbox" | "codexExtraArgs">> &
+): Required<Pick<RunOneOptions, "dryRun" | "baseDir" | "sandbox" | "codexExtraArgs" | "interactive">> &
   Pick<RunOneOptions, "taskId"> {
   if (typeof taskIdOrOptions === "object" && taskIdOrOptions !== null) {
     return {
@@ -249,6 +265,7 @@ function normalizeRunOneOptions(
       baseDir: taskIdOrOptions.baseDir ?? ".codex-pm",
       sandbox: taskIdOrOptions.sandbox ?? "workspace-write",
       codexExtraArgs: taskIdOrOptions.codexExtraArgs ?? [],
+      interactive: taskIdOrOptions.interactive ?? false,
     };
   }
 
@@ -258,7 +275,53 @@ function normalizeRunOneOptions(
     baseDir: ".codex-pm",
     sandbox: "workspace-write",
     codexExtraArgs: [],
+    interactive: false,
   };
+}
+
+/**
+ * 交互式询问用户是否批准高风险任务
+ */
+async function promptInteractiveApproval(
+  task: CodexPmTask,
+  riskGate: RiskGate
+): Promise<boolean> {
+  const riskResult = riskGate.evaluate(task);
+
+  const details: string[] = [];
+  details.push("");
+  details.push("⚠  HIGH RISK TASK DETECTED");
+  details.push("");
+  details.push(`  Task ID:   ${task.id}`);
+  details.push(`  Title:     ${task.title}`);
+  details.push(`  Risk:      ${task.risk} (${Math.round(riskResult.score * 100)}%)`);
+  details.push(`  Priority:  ${task.priority}`);
+  details.push(`  Size:      ${task.size}`);
+  details.push("");
+
+  if (riskResult.factors.length > 0) {
+    details.push("  Risk factors:");
+    for (const factor of riskResult.factors.slice(0, 5)) {
+      if (factor.contribution > 0) {
+        details.push(`    - ${factor.name}: ${factor.details}`);
+      }
+    }
+    details.push("");
+  }
+
+  if (task.description) {
+    details.push("  Description:");
+    details.push(`    ${task.description.substring(0, 150)}${task.description.length > 150 ? "..." : ""}`);
+    details.push("");
+  }
+
+  const approved = await confirm({
+    question: "Approve this high-risk task?",
+    default: false,
+    details,
+  });
+
+  return approved;
 }
 
 export function formatRunOneOutput(result: RunOneResult): string {
