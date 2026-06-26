@@ -108,3 +108,22 @@ links the audit entry to `.codex-pm/results/<run_id>.json`.
   "penalty": 0
 }
 ```
+
+## Energy State
+
+Stored in `.codex-pm/energy.json`.
+
+```json
+{
+  "balance": 450,
+  "lastUpdatedAt": "2026-06-26T10:30:00.000Z",
+  "totalEarned": 1200,
+  "totalSpent": 750
+}
+```
+
+Fields:
+- `balance`: Current energy balance (0 to maxEnergy)
+- `lastUpdatedAt`: ISO timestamp of last energy change
+- `totalEarned`: Total energy earned (initial + refunds + manual refills)
+- `totalSpent`: Total energy spent on tasks

@@ -40,6 +40,7 @@ State Store + Reporter
   tasks.json
   docs-index.json
   task-runs.jsonl
+  energy.json
   prompts/
   results/
   reports/
@@ -76,6 +77,23 @@ Builds dependencies and computes runnable tasks.
 ### PM Cerebellum
 
 Non-LLM controller that decides what should happen next using rules, weights, memory, cost, risk, and profile.
+
+### Energy Gate
+
+Controls task execution through energy budget management:
+- Estimates task energy cost based on size, risk, and retry count
+- Tracks energy balance with persistence to `energy.json`
+- Auto-restores energy at 50 units/hour (max 2000 units)
+- Refunds 30% of energy when task succeeds with verification
+- Blocks execution when energy is insufficient
+- Supports manual energy refill and reset
+
+Energy cost formula:
+```
+estimatedCost = baseCost × riskMultiplier × retryFactor + verificationCost
+baseCost: XS=10, S=20, M=40, L=80, XL=160
+riskMultiplier: none=0.8, low=1.0, medium=1.2, high=1.5, critical=2.0
+```
 
 ### Prompt Builder
 

@@ -142,6 +142,7 @@ codex-pm run-one     # Execute the task with Codex
 | `fitness` | Show fitness metrics summary |
 | `evolve` | Analyze evolution experiment results |
 | `genome` | Manage PM strategy profiles |
+| `energy` | Manage energy balance |
 
 ### Common Usage
 
@@ -175,6 +176,18 @@ codex-pm fitness --task P1-T003
 # Analyze evolution experiments
 codex-pm evolve --report
 codex-pm evolve --list
+
+# Interactive mode (prompt for high-risk task approval)
+codex-pm run --interactive --max-tasks 10
+codex-pm run-one --task P2-T003 --interactive
+
+# Energy management
+codex-pm energy              # Show energy status
+codex-pm energy --refill 500 # Add 500 energy
+codex-pm energy --reset      # Reset to initial value
+
+# Run with energy refill
+codex-pm run --refill-energy 1000 --max-tasks 10
 ```
 
 ---
@@ -223,6 +236,102 @@ codex-pm status --risk
 After human review, mark the task as approved in `TASKS.md` with
 `Human approval: yes`. Codex PM rejects managed real execution with sandbox
 disabled or `danger-full-access`.
+
+### Interactive Approval Mode
+
+For a more streamlined workflow, use interactive mode to approve high-risk tasks
+on the fly:
+
+```bash
+# Run with interactive approval
+codex-pm run --interactive --max-tasks 10
+
+# Output when high-risk task is detected:
+# ⚠  HIGH RISK TASK DETECTED
+# 
+#   Task ID:   P2-T003
+#   Title:     Implement authentication
+#   Risk:      high (78.5%)
+#   Priority:  8
+#   Size:      L
+# 
+#   Risk factors:
+#     - base_risk: Task risk field: high
+#     - keywords: Matched: auth, password, token
+# 
+# Approve this high-risk task and continue? [y/N]
+```
+
+**Features:**
+- ✅ Terminal-based approval prompts
+- ✅ Shows task details and risk factors
+- ✅ Defaults to NO for safety
+- ✅ Falls back to automatic stop in non-TTY environments
+
+---
+
+## Energy System
+
+Codex PM uses an energy system to prevent unlimited task execution:
+
+### Energy Rules
+
+| Rule | Description |
+|------|-------------|
+| **Initial Energy** | 500 units |
+| **Max Energy** | 2000 units |
+| **Time Restore** | 50 units per hour |
+| **Success Refund** | 30% of task cost (only when verification passes) |
+
+### Energy Cost Calculation
+
+```
+estimatedCost = baseCost × riskMultiplier × retryFactor + verificationCost
+
+baseCost: XS=10, S=20, M=40, L=80, XL=160
+riskMultiplier: none=0.8, low=1.0, medium=1.2, high=1.5, critical=2.0
+```
+
+### Energy Management
+
+```bash
+# Check energy status
+codex-pm energy
+# === Energy Status ===
+# Balance: 450 / 2000 units
+# Total Earned: 1200 units
+# Total Spent: 750 units
+# Restore Rate: 50 units/hour
+# Success Refund: 30%
+
+# Refill energy manually
+codex-pm energy --refill 500
+# Energy refilled: +500 units (new balance: 950)
+
+# Reset energy to initial value
+codex-pm energy --reset
+# Energy reset to 500 units
+
+# Refill when running tasks
+codex-pm run --refill-energy 1000 --max-tasks 10
+```
+
+### Energy Flow Example
+
+```
+Initial: 500 energy
+
+Execute Task T001 (M/low, cost=40)
+  Spent: -40 → Balance: 460
+  Success + verification passed → Refund: +12 → Balance: 472
+
+Execute Task T002 (L/high, cost=120)
+  Spent: -120 → Balance: 352
+  Failed → No refund → Balance: 352
+
+Wait 2 hours
+  Time restore: +100 → Balance: 452
+```
 
 ---
 

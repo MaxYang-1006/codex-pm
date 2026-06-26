@@ -16,6 +16,7 @@ codex-pm review
 codex-pm memory report
 codex-pm fitness
 codex-pm evolve
+codex-pm energy
 ```
 
 ## start
@@ -91,7 +92,11 @@ codex-pm run-one
 codex-pm run-one --task P1-T002
 codex-pm run-one --dry-run
 codex-pm run-one --sandbox workspace-write
+codex-pm run-one --interactive
 ```
+
+Options:
+- `--interactive`: Prompt for approval on high-risk tasks (high/critical)
 
 Default sandbox mode for real execution is `workspace-write`. Managed execution
 must not disable the sandbox; unsafe modes such as `danger-full-access` or
@@ -105,7 +110,13 @@ Runs several tasks safely.
 codex-pm run --max-tasks 5
 codex-pm run --mode smart
 codex-pm run --mode guided
+codex-pm run --interactive
+codex-pm run --refill-energy 1000
 ```
+
+Options:
+- `--interactive`: Prompt for approval on high-risk tasks (high/critical)
+- `--refill-energy <number>`: Refill energy before running
 
 ## repair
 
@@ -133,3 +144,25 @@ Shows PM fitness metrics.
 Runs evolution experiment mode.
 
 v0.1 may only record episodes and not mutate strategies automatically.
+
+## energy
+
+Manages energy balance.
+
+```bash
+codex-pm energy
+codex-pm energy --status
+codex-pm energy --refill 500
+codex-pm energy --reset
+```
+
+Options:
+- `--status`: Show current energy status (default)
+- `--refill <number>`: Add energy to balance
+- `--reset`: Reset energy to initial value (500)
+
+Energy Rules:
+- Initial: 500 units
+- Max: 2000 units
+- Time restore: 50 units/hour
+- Success refund: 30% of task cost (only when verification passes)
