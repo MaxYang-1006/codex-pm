@@ -29,7 +29,7 @@ Codex PM is not another AI task manager. It is a **cerebellum-style project mana
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/codex-pm.git
+git clone https://github.com/MaxYang-1006/codex-pm.git
 cd codex-pm
 
 # Install dependencies

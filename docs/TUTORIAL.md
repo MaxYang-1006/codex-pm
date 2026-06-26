@@ -144,7 +144,7 @@ npm install --save-dev codex-pm
 #### 方式三：从源码运行
 
 ```bash
-git clone https://github.com/your-org/codex-pm.git
+git clone https://github.com/MaxYang-1006/codex-pm.git
 cd codex-pm
 npm install
 npm run build

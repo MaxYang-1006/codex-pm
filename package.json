@@ -60,10 +60,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/codex-pm.git"
+    "url": "https://github.com/MaxYang-1006/codex-pm.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/codex-pm/issues"
+    "url": "https://github.com/MaxYang-1006/codex-pm/issues"
   },
-  "homepage": "https://github.com/your-org/codex-pm#readme"
+  "homepage": "https://github.com/MaxYang-1006/codex-pm#readme"
 }
