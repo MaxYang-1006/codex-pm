@@ -163,9 +163,11 @@ export class LoopRunner {
           // 如果 stopOnHighRisk 为 false 且非交互式，则直接继续（不安全但用户配置了）
         }
 
-        // 检查能量预算
+        // 检查能量预算（使用持久化能量）
         const estimate = energyGate.estimate(task);
-        if (totalEnergyUsed + estimate.estimatedCost > this.options.energyBudget) {
+        const currentBalance = energyGate.getBalance();
+
+        if (!this.options.dryRun && currentBalance < estimate.estimatedCost) {
           stopReason = "energy_budget_exceeded";
           break;
         }
@@ -179,6 +181,19 @@ export class LoopRunner {
         // 计算实际能量消耗（使用估算值作为实际消耗）
         const actualEnergyCost = estimate.estimatedCost;
         totalEnergyUsed += actualEnergyCost;
+
+        // 非 dry-run 模式下实际消耗能量
+        if (!this.options.dryRun) {
+          energyGate.spendEnergy(actualEnergyCost);
+
+          // 任务成功且验证通过时返还30%能量
+          if (result.success) {
+            const refundResult = energyGate.refundEnergy(actualEnergyCost);
+            if (refundResult.refunded > 0) {
+              totalEnergyUsed -= refundResult.refunded;
+            }
+          }
+        }
 
         // 记录结果
         taskResults.push({

@@ -9,6 +9,7 @@ import { createFitnessCommand } from "./commands/fitness.js";
 import { runRun, formatRunOutput } from "./commands/run.js";
 import { runRepair, formatRepairOutput } from "./commands/repair.js";
 import { runEvolve, formatEvolveOutput } from "./commands/evolve.js";
+import { EnergyGate } from "./core/energy-gate.js";
 
 const program = new Command();
 
@@ -73,9 +74,18 @@ program
   .option("--dry-run", "Write prompts but do not execute Codex")
   .option("--energy-budget <number>", "Energy budget limit", "500")
   .option("-i, --interactive", "interactive mode: prompt for approval on high-risk tasks")
+  .option("--refill-energy <number>", "Refill energy before running")
   .action(async options => {
     const maxTasks = parseInt(options.maxTasks, 10);
     const energyBudget = parseInt(options.energyBudget, 10);
+
+    if (options.refillEnergy) {
+      const energyGate = new EnergyGate();
+      const refillAmount = parseInt(options.refillEnergy, 10);
+      const result = energyGate.refillEnergy(refillAmount);
+      console.log(`Energy refilled: +${result.added} units (new balance: ${result.newBalance})`);
+    }
+
     const result = await runRun({
       maxTasks,
       dryRun: options.dryRun,
@@ -116,5 +126,27 @@ program
   });
 
 program.addCommand(createFitnessCommand());
+
+program
+  .command("energy")
+  .description("Manage energy balance")
+  .option("--status", "Show current energy status")
+  .option("--refill <number>", "Refill energy")
+  .option("--reset", "Reset energy to initial value")
+  .action(options => {
+    const energyGate = new EnergyGate();
+
+    if (options.reset) {
+      const state = energyGate.resetEnergy();
+      console.log(`Energy reset to ${state.balance} units`);
+    } else if (options.refill) {
+      const amount = parseInt(options.refill, 10);
+      const result = energyGate.refillEnergy(amount);
+      console.log(`Energy refilled: +${result.added} units (new balance: ${result.newBalance})`);
+    } else {
+      const status = energyGate.formatEnergyStatus();
+      console.log(status);
+    }
+  });
 
 program.parse();
