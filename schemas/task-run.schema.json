@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex PM Task Run Entry",
+  "type": "object",
+  "required": [
+    "task_id",
+    "run_id",
+    "started_at",
+    "status",
+    "success",
+    "verification_results",
+    "verification_passed",
+    "retry_count",
+    "risk_incident",
+    "duration_ms",
+    "exit_code"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "needs_review"
+      ]
+    },
+    "success": {
+      "type": "boolean"
+    },
+    "result_path": {
+      "type": "string"
+    },
+    "prompt_path": {
+      "type": "string"
+    },
+    "verification_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/verification_result"
+      }
+    },
+    "verification_passed": {
+      "type": "boolean"
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "risk_incident": {
+      "type": "boolean"
+    },
+    "duration_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "exit_code": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "reward": {
+      "type": "number"
+    },
+    "penalty": {
+      "type": "number"
+    }
+  },
+  "$defs": {
+    "verification_result": {
+      "type": "object",
+      "required": [
+        "command",
+        "success",
+        "stdout",
+        "stderr",
+        "exitCode",
+        "duration"
+      ],
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "stdout": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "exitCode": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "duration": {
+          "type": "number"
+        },
+        "error": {
+          "enum": [
+            "timeout",
+            "not_found",
+            "execution_error"
+          ]
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

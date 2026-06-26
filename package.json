@@ -1,0 +1,69 @@
+{
+  "name": "codex-pm",
+  "version": "0.1.0",
+  "description": "A cerebellum-style evolving project manager plugin for Codex.",
+  "type": "module",
+  "main": "dist/src/cli.js",
+  "types": "dist/src/cli.d.ts",
+  "bin": {
+    "codex-pm": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src/",
+    ".codex-plugin/",
+    "skills/",
+    "docs/",
+    "examples/",
+    "experiments/",
+    "schemas/",
+    "templates/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test tests/*.test.ts",
+    "lint": "eslint src/**/*.ts tests/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts tests/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts tests/**/*.ts",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "gray-matter": "^4.0.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "codex",
+    "project-manager",
+    "cli",
+    "automation",
+    "task-management",
+    "cerebellum"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/codex-pm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/codex-pm/issues"
+  },
+  "homepage": "https://github.com/your-org/codex-pm#readme"
+}

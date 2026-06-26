@@ -1,0 +1,154 @@
+{
+  "version": "1.0.0",
+  "description": "Default PM genome profiles for Codex PM evolution experiments",
+  "genomes": [
+    {
+      "id": "balanced-v1",
+      "profile": "balanced",
+      "name": "Balanced PM",
+      "description": "Default baseline. Balanced priority, risk, and speed.",
+      "weights": {
+        "priority": 10,
+        "unlock_count": 5,
+        "risk_penalty_low": 0,
+        "risk_penalty_medium": -2,
+        "risk_penalty_high": -5,
+        "risk_penalty_critical": -10,
+        "size_penalty_xs": 0,
+        "size_penalty_s": 0,
+        "size_penalty_m": -1,
+        "size_penalty_l": -2,
+        "size_penalty_xl": -4,
+        "failure_penalty": -3,
+        "memory_recall_weight": 1.0,
+        "verification_weight": 1.0
+      },
+      "thresholds": {
+        "max_consecutive_failures": 2,
+        "max_retries": 2,
+        "high_risk_stop": true,
+        "energy_budget_default": 500,
+        "risk_approval_threshold": 0.7
+      },
+      "persona": {
+        "risk_tolerance": 0.5,
+        "quality_bias": 0.5,
+        "speed_bias": 0.5,
+        "autonomy_level": 0.6,
+        "test_strictness": 0.7,
+        "refactor_tolerance": 0.4
+      }
+    },
+    {
+      "id": "conservative-v1",
+      "profile": "conservative",
+      "name": "Conservative PM",
+      "description": "Low risk, high verification, slow but safe.",
+      "weights": {
+        "priority": 8,
+        "unlock_count": 3,
+        "risk_penalty_low": -1,
+        "risk_penalty_medium": -5,
+        "risk_penalty_high": -10,
+        "risk_penalty_critical": -20,
+        "size_penalty_xs": 0,
+        "size_penalty_s": -1,
+        "size_penalty_m": -3,
+        "size_penalty_l": -5,
+        "size_penalty_xl": -8,
+        "failure_penalty": -5,
+        "memory_recall_weight": 1.5,
+        "verification_weight": 2.0
+      },
+      "thresholds": {
+        "max_consecutive_failures": 1,
+        "max_retries": 1,
+        "high_risk_stop": true,
+        "energy_budget_default": 300,
+        "risk_approval_threshold": 0.3
+      },
+      "persona": {
+        "risk_tolerance": 0.2,
+        "quality_bias": 0.9,
+        "speed_bias": 0.2,
+        "autonomy_level": 0.3,
+        "test_strictness": 0.95,
+        "refactor_tolerance": 0.1
+      }
+    },
+    {
+      "id": "startup-v1",
+      "profile": "startup",
+      "name": "Startup PM",
+      "description": "Fast MVP delivery, accepts controlled technical debt.",
+      "weights": {
+        "priority": 12,
+        "unlock_count": 8,
+        "risk_penalty_low": 0,
+        "risk_penalty_medium": -1,
+        "risk_penalty_high": -3,
+        "risk_penalty_critical": -8,
+        "size_penalty_xs": 0,
+        "size_penalty_s": 0,
+        "size_penalty_m": 0,
+        "size_penalty_l": -1,
+        "size_penalty_xl": -2,
+        "failure_penalty": -2,
+        "memory_recall_weight": 0.5,
+        "verification_weight": 0.5
+      },
+      "thresholds": {
+        "max_consecutive_failures": 3,
+        "max_retries": 3,
+        "high_risk_stop": false,
+        "energy_budget_default": 800,
+        "risk_approval_threshold": 0.8
+      },
+      "persona": {
+        "risk_tolerance": 0.8,
+        "quality_bias": 0.3,
+        "speed_bias": 0.9,
+        "autonomy_level": 0.8,
+        "test_strictness": 0.4,
+        "refactor_tolerance": 0.7
+      }
+    },
+    {
+      "id": "research-v1",
+      "profile": "research",
+      "name": "Research PM",
+      "description": "Allows experiments, records hypotheses and lessons.",
+      "weights": {
+        "priority": 7,
+        "unlock_count": 6,
+        "risk_penalty_low": 0,
+        "risk_penalty_medium": -2,
+        "risk_penalty_high": -4,
+        "risk_penalty_critical": -12,
+        "size_penalty_xs": 0,
+        "size_penalty_s": 0,
+        "size_penalty_m": -1,
+        "size_penalty_l": -2,
+        "size_penalty_xl": -3,
+        "failure_penalty": -1,
+        "memory_recall_weight": 2.0,
+        "verification_weight": 1.2
+      },
+      "thresholds": {
+        "max_consecutive_failures": 4,
+        "max_retries": 4,
+        "high_risk_stop": true,
+        "energy_budget_default": 600,
+        "risk_approval_threshold": 0.6
+      },
+      "persona": {
+        "risk_tolerance": 0.6,
+        "quality_bias": 0.6,
+        "speed_bias": 0.4,
+        "autonomy_level": 0.7,
+        "test_strictness": 0.6,
+        "refactor_tolerance": 0.8
+      }
+    }
+  ]
+}

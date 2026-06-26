@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex PM Task Result",
+  "type": "object",
+  "required": [
+    "task_id",
+    "run_id",
+    "status",
+    "changed_files",
+    "commands_run",
+    "verification_passed",
+    "verification_results",
+    "risks",
+    "blockers",
+    "written_at",
+    "execution"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "blocked",
+        "failed",
+        "needs_review",
+        "needs_approval"
+      ]
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "commands_run": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_passed": {
+      "type": "boolean"
+    },
+    "verification_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/verification_result"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prompt_path": {
+      "type": "string"
+    },
+    "written_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "success",
+        "exit_code",
+        "duration_ms",
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "exit_code": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "duration_ms": {
+          "type": "number"
+        },
+        "stdout": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "reward": {
+      "type": "number"
+    },
+    "penalty": {
+      "type": "number"
+    }
+  },
+  "$defs": {
+    "verification_result": {
+      "type": "object",
+      "required": [
+        "command",
+        "success",
+        "stdout",
+        "stderr",
+        "exitCode",
+        "duration"
+      ],
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "stdout": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "exitCode": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "duration": {
+          "type": "number"
+        },
+        "error": {
+          "enum": [
+            "timeout",
+            "not_found",
+            "execution_error"
+          ]
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

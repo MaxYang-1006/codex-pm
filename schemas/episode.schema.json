@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex PM Evolution Episode",
+  "type": "object",
+  "required": [
+    "episode_id",
+    "task_id",
+    "genome_id",
+    "risk_score",
+    "energy_cost",
+    "reward",
+    "penalty"
+  ],
+  "properties": {
+    "episode_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "genome_id": {
+      "type": "string"
+    },
+    "selected_task_score": {
+      "type": "number"
+    },
+    "risk_score": {
+      "type": "number"
+    },
+    "energy_cost": {
+      "type": "number"
+    },
+    "codex_status": {
+      "type": "string"
+    },
+    "verify_passed": {
+      "type": "boolean"
+    },
+    "retry_count": {
+      "type": "integer"
+    },
+    "changed_files": {
+      "type": "integer"
+    },
+    "diff_lines": {
+      "type": "integer"
+    },
+    "reward": {
+      "type": "number"
+    },
+    "penalty": {
+      "type": "number"
+    },
+    "fitness_delta": {
+      "type": "number"
+    }
+  }
+}

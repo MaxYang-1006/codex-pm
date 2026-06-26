@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.codex-pm/
+*.md
+*.json
+*.yaml
+*.yml

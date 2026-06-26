@@ -1,0 +1,18 @@
+services:
+  codex-pm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./docs:/app/docs
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./.codex-pm:/app/.codex-pm
+      - codex-pm-dist:/app/dist
+    working_dir: /app
+    command: sh -c "npm run build && npm run dev"
+
+volumes:
+  codex-pm-dist:

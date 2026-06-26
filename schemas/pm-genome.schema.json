@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex PM Genome",
+  "type": "object",
+  "required": [
+    "id",
+    "profile",
+    "weights",
+    "thresholds",
+    "persona"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string"
+    },
+    "weights": {
+      "type": "object"
+    },
+    "thresholds": {
+      "type": "object"
+    },
+    "persona": {
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "codex-pm",
+  "version": "0.1.0",
+  "description": "A Codex-native project manager plugin that turns docs/ into verified development progress.",
+  "icon": "./icon.svg",
+  "author": {
+    "name": "Codex PM Contributors"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/your-name/codex-pm",
+  "keywords": [
+    "codex",
+    "project-manager",
+    "agent",
+    "docs-first",
+    "task-runner",
+    "evolving-agent",
+    "cerebellum"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex PM",
+    "shortDescription": "Project manager cerebellum for Codex.",
+    "longDescription": "Codex PM reads docs/ Markdown project documents, builds a task graph, selects safe runnable tasks, briefs Codex, verifies the result, records execution memory, and supports adaptive project management experiments.",
+    "developerName": "Codex PM Contributors",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use Codex PM to start this project from docs/.",
+      "Use Codex PM to recommend the next runnable task.",
+      "Use Codex PM to run one safe verified task.",
+      "Use Codex PM to review project progress and memory."
+    ]
+  }
+}
