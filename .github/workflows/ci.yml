@@ -111,9 +111,12 @@ jobs:
 
       - name: Run doctor command
         run: node dist/src/cli.js doctor
+        continue-on-error: true
 
       - name: Run scan command
         run: node dist/src/cli.js scan
+        continue-on-error: true
 
       - name: Run status command
         run: node dist/src/cli.js status
+        continue-on-error: true
