@@ -3,7 +3,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { StateManager } from "../core/state-manager.js";
 import { TaskGraph } from "../core/task-graph.js";
-import { TaskScorer } from "../core/task-scorer.js";
 
 export interface ReviewResult {
   success: boolean;
@@ -92,7 +91,6 @@ function parseChangedFiles(statusOutput: string): string[] {
 
 function buildTaskStatus(tasks: any[]): ReviewTaskStatus[] {
   const graph = new TaskGraph(tasks);
-  const scorer = new TaskScorer();
 
   const statusList: ReviewTaskStatus[] = [];
 
