@@ -214,7 +214,7 @@ function generateScanReport(
     reportLines.push("## Parse Errors");
     reportLines.push("");
     for (const error of parseResult.errors) {
-      reportLines.push(`- Line ${error.line}: ${error.message}`);
+      reportLines.push(`- Line ${error.line_number}: ${error.message}`);
     }
     reportLines.push("");
   }
