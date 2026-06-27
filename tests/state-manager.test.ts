@@ -24,7 +24,7 @@ describe("State Manager", () => {
 
       const state = manager.getState();
       assert.ok(state);
-      assert.strictEqual(state.version, "0.1.0");
+      assert.strictEqual(state.version, "0.2.0");
       assert.ok(state.project_id);
       assert.ok(state.created_at);
       assert.ok(state.updated_at);
