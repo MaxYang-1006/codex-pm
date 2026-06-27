@@ -247,6 +247,8 @@ export function formatReviewOutput(result: ReviewResult): string {
     const pendingWithoutBlockers = result.taskStatus.filter(
       t => t.status === "pending" && t.blockers.length === 0
     );
+    const pendingTasks = result.taskStatus.filter(t => t.status === "pending");
+    const doneTasks = result.taskStatus.filter(t => t.status === "done");
 
     if (pendingWithoutBlockers.length > 0) {
       lines.push("✅ Ready to run:");
