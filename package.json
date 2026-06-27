@@ -1,6 +1,6 @@
 {
   "name": "codex-pm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A cerebellum-style evolving project manager plugin for Codex.",
   "type": "module",
   "main": "dist/src/cli.js",
