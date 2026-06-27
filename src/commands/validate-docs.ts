@@ -149,7 +149,7 @@ function validateTasksMd(filePath: string, filename: string): { errors: Validati
     for (const error of parseResult.errors) {
       errors.push({
         file: filename,
-        line: error.line,
+        line: error.line_number,
         message: `Parse error: ${error.message}`,
         severity: "error",
       });

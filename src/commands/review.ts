@@ -95,7 +95,8 @@ function buildTaskStatus(tasks: any[]): ReviewTaskStatus[] {
   const statusList: ReviewTaskStatus[] = [];
 
   for (const task of tasks) {
-    const blockers = graph.getBlockers(task.id);
+    const depInfo = graph.getDependencyInfo(task.id);
+    const blockers = depInfo.missingDependencies;
 
     statusList.push({
       taskId: task.id,

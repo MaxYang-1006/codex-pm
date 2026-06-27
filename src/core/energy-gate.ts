@@ -177,7 +177,7 @@ export class EnergyGate {
 
     this.saveEnergy(state);
 
-    return { refunded, newBalance: state.balance };
+    return { refunded: refundAmount, newBalance: state.balance };
   }
 
   /**

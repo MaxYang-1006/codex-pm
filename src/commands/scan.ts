@@ -1,8 +1,9 @@
 import { DocsScanner } from "../core/docs-scanner.js";
-import { TaskParser } from "../core/task-parser.js";
-import { TaskNormalizer } from "../core/task-normalizer.js";
+import { TaskParser, type ParseResult } from "../core/task-parser.js";
+import { TaskNormalizer, type NormalizeResult } from "../core/task-normalizer.js";
 import { StateManager } from "../core/state-manager.js";
 import { ensureDirectoryExists } from "../core/file-utils.js";
+import type { DocIndexEntry } from "../types/state.js";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -160,9 +161,9 @@ export function formatScanOutput(result: ScanResult): string {
 }
 
 function generateScanReport(
-  scanResult: any,
-  normalizeResult: any,
-  parseResult: any
+  scanResult: { entries: DocIndexEntry[]; total_files: number; warnings: string[] },
+  normalizeResult: NormalizeResult,
+  parseResult: ParseResult
 ): void {
   const reportDir = ".codex-pm";
   ensureDirectoryExists(reportDir);
