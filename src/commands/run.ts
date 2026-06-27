@@ -12,7 +12,7 @@ export interface RunResult {
  */
 export async function runRun(options: {
   maxTasks?: number;
-  mode?: string;
+  mode?: "smart" | "guided";
   dryRun?: boolean;
   energyBudget?: number;
   interactive?: boolean;
@@ -25,6 +25,7 @@ export async function runRun(options: {
       stopOnHighRisk: true,
       maxConsecutiveFailures: 2,
       interactive: options.interactive,
+      mode: options.mode,
     });
 
     const report = await runner.run();

@@ -132,13 +132,16 @@ codex-pm run-one     # Execute the task with Codex
 
 | Command | Description |
 |---------|-------------|
+| `start` | First-run setup: doctor → scan → recommend |
 | `doctor` | Check environment and prerequisites |
+| `validate-docs` | Validate docs format and completeness |
 | `scan` | Scan docs and build task graph |
 | `status` | Show project and task status |
 | `next` | Recommend next runnable task |
 | `run-one` | Run a single task (dry-run by default) |
 | `run` | Run multiple tasks with loop control |
 | `repair` | Repair failed tasks |
+| `review` | Review current diff and task status |
 | `fitness` | Show fitness metrics summary |
 | `evolve` | Analyze evolution experiment results |
 | `genome` | Manage PM strategy profiles |
@@ -147,12 +150,25 @@ codex-pm run-one     # Execute the task with Codex
 ### Common Usage
 
 ```bash
+# First-time setup
+codex-pm start
+
 # Check environment health
 codex-pm doctor
+
+# Validate docs format
+codex-pm validate-docs
 
 # Scan project and see status
 codex-pm scan
 codex-pm status
+
+# Review git diff and task status
+codex-pm review
+
+# Get next recommended task (smart or sequential mode)
+codex-pm next
+codex-pm next --mode sequential
 
 # Run next recommended task (dry-run mode)
 codex-pm run-one --dry-run
@@ -165,6 +181,9 @@ codex-pm run-one --task P1-T001 --sandbox workspace-write
 
 # Run with loop control (max 5 tasks)
 codex-pm run --max-tasks 5
+
+# Run with guided mode
+codex-pm run --mode guided --max-tasks 10
 
 # Repair a failed task
 codex-pm repair --task P1-T003
@@ -433,8 +452,11 @@ Codex PM stores state in `.codex-pm/` directory:
 ├── state.json          # Project state and tasks
 ├── audit.jsonl         # Execution audit logs
 ├── episodes.jsonl      # Evolution episode logs
+├── scan-report.md      # Scan report
+├── energy.json         # Energy balance
 ├── memory/             # Memory storage
 ├── results/            # Task execution results
+├── reports/            # Loop run reports
 └── prompts/           # Generated prompts
 ```
 

@@ -58,6 +58,7 @@ export interface LoopRunnerOptions {
   dryRun?: boolean;
   baseDir?: string;
   interactive?: boolean;
+  mode?: "smart" | "guided";
 }
 
 const DEFAULT_OPTIONS: Required<
@@ -89,7 +90,7 @@ export class LoopRunner {
       LoopRunnerOptions,
       "maxTasks" | "maxConsecutiveFailures" | "energyBudget" | "stopOnHighRisk" | "dryRun" | "interactive"
     >
-  > & { baseDir?: string };
+  > & { baseDir?: string; mode?: "smart" | "guided" };
 
   constructor(options: LoopRunnerOptions = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...options };

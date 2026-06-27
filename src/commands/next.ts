@@ -1,6 +1,10 @@
 import { StateManager } from "../core/state-manager.js";
 import { TaskScorer } from "../core/task-scorer.js";
+import { TaskGraph } from "../core/task-graph.js";
 import type { TaskScore } from "../types/state.js";
+import type { CodexPmTask } from "../types/task.js";
+
+export type NextMode = "smart" | "sequential";
 
 export interface NextResult {
   success: boolean;
@@ -9,9 +13,10 @@ export interface NextResult {
   alternativeTasks?: TaskScore[];
   totalRunnable: number;
   totalPending: number;
+  mode: NextMode;
 }
 
-export function runNext(maxResults: number = 3): NextResult {
+export function runNext(maxResults: number = 3, mode: NextMode = "smart"): NextResult {
   const manager = new StateManager();
 
   if (!manager.isInitialized()) {
@@ -20,14 +25,22 @@ export function runNext(maxResults: number = 3): NextResult {
       message: "Project not initialized. Run 'codex-pm scan' first.",
       totalRunnable: 0,
       totalPending: 0,
+      mode,
     };
   }
 
   manager.load();
   const tasks = manager.getTasks();
-  const scorer = new TaskScorer();
 
-  const allScores = scorer.scoreAllTasks(tasks);
+  let allScores: TaskScore[];
+
+  if (mode === "sequential") {
+    allScores = scoreSequential(tasks);
+  } else {
+    const scorer = new TaskScorer();
+    allScores = scorer.scoreAllTasks(tasks);
+  }
+
   const totalRunnable = allScores.length;
   const totalPending = tasks.filter(t => t.status === "pending").length;
 
@@ -37,6 +50,7 @@ export function runNext(maxResults: number = 3): NextResult {
       message: "No runnable tasks found.",
       totalRunnable: 0,
       totalPending,
+      mode,
     };
   }
 
@@ -50,7 +64,32 @@ export function runNext(maxResults: number = 3): NextResult {
     alternativeTasks,
     totalRunnable,
     totalPending,
+    mode,
   };
+}
+
+function scoreSequential(tasks: CodexPmTask[]): TaskScore[] {
+  const graph = new TaskGraph(tasks);
+  const runnable = graph.getRunnableTasks();
+
+  return runnable.map(task => ({
+    task_id: task.id,
+    title: task.title,
+    score: 0,
+    reason: "Sequential mode: ordered by priority and task ID",
+    breakdown: {
+      priority: task.priority,
+      unlock_count: 0,
+      risk_penalty: 0,
+      size_penalty: 0,
+      failure_penalty: 0,
+    },
+  })).sort((a, b) => {
+    if (b.breakdown.priority !== a.breakdown.priority) {
+      return b.breakdown.priority - a.breakdown.priority;
+    }
+    return a.task_id.localeCompare(b.task_id);
+  });
 }
 
 export function formatNextOutput(result: NextResult): string {
@@ -64,6 +103,9 @@ export function formatNextOutput(result: NextResult): string {
   }
 
   lines.push("=== Codex PM Next ===");
+  lines.push("");
+
+  lines.push(`Mode: ${result.mode === "smart" ? "Smart Scoring" : "Sequential"}`);
   lines.push("");
 
   if (!result.selectedTask) {

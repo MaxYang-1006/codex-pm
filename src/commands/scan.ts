@@ -2,7 +2,9 @@ import { DocsScanner } from "../core/docs-scanner.js";
 import { TaskParser } from "../core/task-parser.js";
 import { TaskNormalizer } from "../core/task-normalizer.js";
 import { StateManager } from "../core/state-manager.js";
+import { ensureDirectoryExists } from "../core/file-utils.js";
 import * as fs from "fs";
+import * as path from "path";
 
 export interface ScanResult {
   success: boolean;
@@ -86,6 +88,8 @@ export async function runScan(): Promise<ScanResult> {
 
     manager.save();
 
+    generateScanReport(scanResult, normalizeResult, parseResult);
+
     return {
       success: true,
       message: `Successfully scanned ${scanResult.total_files} docs and parsed ${normalizeResult.tasks.length} tasks`,
@@ -153,4 +157,85 @@ export function formatScanOutput(result: ScanResult): string {
   }
 
   return lines.join("\n");
+}
+
+function generateScanReport(
+  scanResult: any,
+  normalizeResult: any,
+  parseResult: any
+): void {
+  const reportDir = ".codex-pm";
+  ensureDirectoryExists(reportDir);
+
+  const reportLines: string[] = [];
+
+  reportLines.push("# Codex PM Scan Report");
+  reportLines.push("");
+  reportLines.push(`Generated at: ${new Date().toISOString()}`);
+  reportLines.push("");
+
+  reportLines.push("## Document Index");
+  reportLines.push("");
+  reportLines.push(`Total documents scanned: ${scanResult.total_files}`);
+  reportLines.push("");
+  reportLines.push("| File | Size |");
+  reportLines.push("|------|------|");
+  for (const entry of scanResult.entries) {
+    reportLines.push(`| ${entry.filename} | ${entry.size} bytes |`);
+  }
+  reportLines.push("");
+
+  reportLines.push("## Task Analysis");
+  reportLines.push("");
+  reportLines.push(`Total tasks: ${normalizeResult.tasks.length}`);
+
+  const doneCount = normalizeResult.tasks.filter(t => t.status === "done").length;
+  const pendingCount = normalizeResult.tasks.filter(t => t.status === "pending").length;
+  const failedCount = normalizeResult.tasks.filter(t => t.status === "failed").length;
+
+  reportLines.push(`- Done: ${doneCount}`);
+  reportLines.push(`- Pending: ${pendingCount}`);
+  reportLines.push(`- Failed: ${failedCount}`);
+  reportLines.push("");
+
+  if (normalizeResult.tasks.length > 0) {
+    reportLines.push("### Task Status Breakdown");
+    reportLines.push("");
+    reportLines.push("| Task ID | Title | Status | Risk | Priority |");
+    reportLines.push("|---------|-------|--------|------|----------|");
+    for (const task of normalizeResult.tasks) {
+      reportLines.push(`| ${task.id} | ${task.title} | ${task.status} | ${task.risk} | ${task.priority} |`);
+    }
+    reportLines.push("");
+  }
+
+  if (parseResult.errors.length > 0) {
+    reportLines.push("## Parse Errors");
+    reportLines.push("");
+    for (const error of parseResult.errors) {
+      reportLines.push(`- Line ${error.line}: ${error.message}`);
+    }
+    reportLines.push("");
+  }
+
+  if (normalizeResult.dependencyErrors.length > 0) {
+    reportLines.push("## Dependency Errors");
+    reportLines.push("");
+    for (const error of normalizeResult.dependencyErrors) {
+      reportLines.push(`- ${error}`);
+    }
+    reportLines.push("");
+  }
+
+  if (scanResult.warnings.length > 0 || parseResult.warnings.length > 0 || normalizeResult.warnings.length > 0) {
+    reportLines.push("## Warnings");
+    reportLines.push("");
+    for (const warning of [...scanResult.warnings, ...parseResult.warnings, ...normalizeResult.warnings]) {
+      reportLines.push(`- ${warning}`);
+    }
+    reportLines.push("");
+  }
+
+  const reportPath = path.join(reportDir, "scan-report.md");
+  fs.writeFileSync(reportPath, reportLines.join("\n"));
 }
