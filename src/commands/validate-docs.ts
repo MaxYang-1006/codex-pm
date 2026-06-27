@@ -79,7 +79,7 @@ export function runValidateDocs(docsPath: string = "./docs"): ValidateDocsResult
 
   warnings.push(...scanResult.warnings.map(w => ({ file: docsPath, message: w })));
 
-  checkRequiredDocs(scanResult.entries, errors, warnings);
+  checkRequiredDocs(scanResult.entries, errors);
   checkRecommendedDocs(scanResult.entries, warnings);
 
   const tasksMdEntry = scanResult.entries.find(e => e.filename.match(/TASKS/i));
@@ -113,7 +113,7 @@ export function runValidateDocs(docsPath: string = "./docs"): ValidateDocsResult
   };
 }
 
-function checkRequiredDocs(entries: DocIndexEntry[], errors: ValidationError[], warnings: ValidationWarning[]) {
+function checkRequiredDocs(entries: DocIndexEntry[], errors: ValidationError[]) {
   for (const required of REQUIRED_DOCS) {
     const found = entries.some(e => e.filename.match(required.pattern));
     if (!found) {
