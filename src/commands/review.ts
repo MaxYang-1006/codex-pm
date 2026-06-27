@@ -1,6 +1,4 @@
 import { spawn } from "child_process";
-import * as fs from "fs";
-import * as path from "path";
 import { StateManager } from "../core/state-manager.js";
 import { TaskGraph } from "../core/task-graph.js";
 import type { CodexPmTask } from "../types/task.js";

@@ -3,6 +3,7 @@ import * as path from "path";
 import { DocsScanner } from "../core/docs-scanner.js";
 import { TaskParser } from "../core/task-parser.js";
 import { TaskNormalizer } from "../core/task-normalizer.js";
+import type { DocIndexEntry } from "../types/state.js";
 
 export interface ValidateDocsResult {
   success: boolean;
@@ -112,7 +113,7 @@ export function runValidateDocs(docsPath: string = "./docs"): ValidateDocsResult
   };
 }
 
-function checkRequiredDocs(entries: Array<{ filename: string; path: string }>, errors: ValidationError[], warnings: ValidationWarning[]) {
+function checkRequiredDocs(entries: DocIndexEntry[], errors: ValidationError[], warnings: ValidationWarning[]) {
   for (const required of REQUIRED_DOCS) {
     const found = entries.some(e => e.filename.match(required.pattern));
     if (!found) {
@@ -125,7 +126,7 @@ function checkRequiredDocs(entries: Array<{ filename: string; path: string }>, e
   }
 }
 
-function checkRecommendedDocs(entries: Array<{ filename: string; path: string }>, warnings: ValidationWarning[]) {
+function checkRecommendedDocs(entries: DocIndexEntry[], warnings: ValidationWarning[]) {
   for (const recommended of RECOMMENDED_DOCS) {
     const found = entries.some(e => e.filename.match(recommended.pattern));
     if (!found) {
