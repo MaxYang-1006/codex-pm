@@ -78,22 +78,34 @@ export class EnergyGate {
   }
 
   /**
-   * 加载能量状态（包含时间恢复）
+   * 加载原始能量状态（不包含时间恢复，不保存）
    */
-  loadEnergy(): EnergyState {
-    let state: EnergyState;
-
+  private loadRawEnergy(): EnergyState {
     try {
       if (fs.existsSync(this.energyFilePath)) {
         const content = fs.readFileSync(this.energyFilePath, "utf-8");
-        state = JSON.parse(content);
-      } else {
-        state = { ...DEFAULT_ENERGY_STATE };
+        return JSON.parse(content);
       }
     } catch {
-      state = { ...DEFAULT_ENERGY_STATE };
+      // ignore
     }
+    return { ...DEFAULT_ENERGY_STATE };
+  }
 
+  /**
+   * 计算当前余额（包含时间恢复，不保存文件）
+   */
+  private calculateBalance(): number {
+    const state = this.loadRawEnergy();
+    const restored = this.calculateTimeRestore(state);
+    return Math.min(state.balance + restored, this.maxEnergy);
+  }
+
+  /**
+   * 加载能量状态（包含时间恢复）
+   */
+  loadEnergy(): EnergyState {
+    const state = this.loadRawEnergy();
     const restored = this.calculateTimeRestore(state);
     state.balance = Math.min(state.balance + restored, this.maxEnergy);
     state.lastUpdatedAt = new Date().toISOString();
@@ -133,11 +145,10 @@ export class EnergyGate {
   }
 
   /**
-   * 获取当前能量余额（包含时间恢复）
+   * 获取当前能量余额（包含时间恢复，不触发文件保存）
    */
   getBalance(): number {
-    const state = this.loadEnergy();
-    return state.balance;
+    return this.calculateBalance();
   }
 
   /**

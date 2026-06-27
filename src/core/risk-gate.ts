@@ -37,6 +37,7 @@ export interface RiskGateConfig {
   approvalRequired: RiskLevel[];
   stopOnCritical: boolean;
   maxHistoricalRiskScore: number;
+  findTaskById?: (taskId: string) => CodexPmTask | null;
 }
 
 export interface RiskHistoryEntry {
@@ -123,9 +124,11 @@ const RISKY_PATTERNS = [
 export class RiskGate {
   private config: RiskGateConfig;
   private historicalRisks: RiskHistoryEntry[] = [];
+  private findTaskFn: (taskId: string) => CodexPmTask | null;
 
   constructor(config: Partial<RiskGateConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+    this.findTaskFn = config.findTaskById || (() => null);
   }
 
   /**
@@ -326,11 +329,10 @@ export class RiskGate {
   }
 
   /**
-   * 查找任务（需要外部提供）
+   * 查找任务（通过依赖注入的函数）
    */
-  private findTaskById(_taskId: string): CodexPmTask | null {
-    // 这个方法需要在实际使用时通过依赖注入提供
-    return null;
+  private findTaskById(taskId: string): CodexPmTask | null {
+    return this.findTaskFn(taskId);
   }
 
   /**

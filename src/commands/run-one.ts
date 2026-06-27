@@ -30,12 +30,9 @@ export interface RunOneOptions {
   interactive?: boolean;
 }
 
-export async function runRunOne(
-  taskIdOrOptions?: string | RunOneOptions,
-  legacyDryRun: boolean = false
-): Promise<RunOneResult> {
-  const options = normalizeRunOneOptions(taskIdOrOptions, legacyDryRun);
-  const { taskId, dryRun, baseDir, sandbox, codexExtraArgs, interactive } = options;
+export async function runRunOne(options: RunOneOptions): Promise<RunOneResult> {
+  const normalized = normalizeRunOneOptions(options);
+  const { taskId, dryRun, baseDir, sandbox, codexExtraArgs, interactive } = normalized;
   const manager = new StateManager(baseDir);
 
   if (!manager.isInitialized()) {
@@ -254,28 +251,16 @@ export async function runRunOne(
 }
 
 function normalizeRunOneOptions(
-  taskIdOrOptions?: string | RunOneOptions,
-  legacyDryRun: boolean = false
+  options: RunOneOptions
 ): Required<Pick<RunOneOptions, "dryRun" | "baseDir" | "sandbox" | "codexExtraArgs" | "interactive">> &
   Pick<RunOneOptions, "taskId"> {
-  if (typeof taskIdOrOptions === "object" && taskIdOrOptions !== null) {
-    return {
-      taskId: taskIdOrOptions.taskId,
-      dryRun: taskIdOrOptions.dryRun ?? false,
-      baseDir: taskIdOrOptions.baseDir ?? ".codex-pm",
-      sandbox: taskIdOrOptions.sandbox ?? "workspace-write",
-      codexExtraArgs: taskIdOrOptions.codexExtraArgs ?? [],
-      interactive: taskIdOrOptions.interactive ?? false,
-    };
-  }
-
   return {
-    taskId: taskIdOrOptions,
-    dryRun: legacyDryRun,
-    baseDir: ".codex-pm",
-    sandbox: "workspace-write",
-    codexExtraArgs: [],
-    interactive: false,
+    taskId: options.taskId,
+    dryRun: options.dryRun ?? false,
+    baseDir: options.baseDir ?? ".codex-pm",
+    sandbox: options.sandbox ?? "workspace-write",
+    codexExtraArgs: options.codexExtraArgs ?? [],
+    interactive: options.interactive ?? false,
   };
 }
 

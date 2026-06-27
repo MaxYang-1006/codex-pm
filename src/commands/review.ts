@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { StateManager } from "../core/state-manager.js";
 import { TaskGraph } from "../core/task-graph.js";
+import type { CodexPmTask } from "../types/task.js";
 
 export interface ReviewResult {
   success: boolean;
@@ -89,7 +90,7 @@ function parseChangedFiles(statusOutput: string): string[] {
   return files;
 }
 
-function buildTaskStatus(tasks: any[]): ReviewTaskStatus[] {
+function buildTaskStatus(tasks: CodexPmTask[]): ReviewTaskStatus[] {
   const graph = new TaskGraph(tasks);
 
   const statusList: ReviewTaskStatus[] = [];

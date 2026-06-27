@@ -127,30 +127,19 @@ export class LoopRunner {
         const tasks = manager.getTasks();
         const scorer = new TaskScorer();
 
-        // 获取所有可运行任务
-        const allScores = scorer.scoreAllTasks(tasks);
-
-        // 过滤掉已处理的任务（dry-run 模式下任务状态不会更新）
-        const availableScores = allScores.filter(s => !processedTaskIds.has(s.task_id));
-
-        if (availableScores.length === 0) {
-          stopReason = "no_runnable_tasks";
-          break;
-        }
-
-        const nextTask = availableScores[0];
-        const task = tasks.find(t => t.id === nextTask.task_id);
-        if (!task) {
+        // 获取下一个要执行的任务
+        const nextTask = this.selectNextTask(tasks, processedTaskIds, scorer);
+        if (!nextTask) {
           stopReason = "no_runnable_tasks";
           break;
         }
 
         // 检查高风险任务
-        const isHighRisk = task.risk === "high" || task.risk === "critical";
+        const isHighRisk = nextTask.risk === "high" || nextTask.risk === "critical";
         if (isHighRisk) {
           // 交互式模式下询问用户
           if (this.options.interactive) {
-            const approved = await this.promptHighRiskApproval(task);
+            const approved = await this.promptHighRiskApproval(nextTask);
             if (!approved) {
               stopReason = "high_risk_stopped";
               break;
@@ -165,7 +154,7 @@ export class LoopRunner {
         }
 
         // 检查能量预算（使用持久化能量）
-        const estimate = energyGate.estimate(task);
+        const estimate = energyGate.estimate(nextTask);
         const currentBalance = energyGate.getBalance();
 
         if (!this.options.dryRun && currentBalance < estimate.estimatedCost) {
@@ -174,10 +163,10 @@ export class LoopRunner {
         }
 
         // 标记任务为已处理
-        processedTaskIds.add(task.id);
+        processedTaskIds.add(nextTask.id);
 
         // 执行单个任务
-        const result = await this.executeTask(task.id);
+        const result = await this.executeTask(nextTask.id);
 
         // 计算实际能量消耗（使用估算值作为实际消耗）
         const actualEnergyCost = estimate.estimatedCost;
@@ -198,7 +187,7 @@ export class LoopRunner {
 
         // 记录结果
         taskResults.push({
-          taskId: task.id,
+          taskId: nextTask.id,
           success: result.success,
           duration: result.executionResult?.duration || 0,
           error: result.success ? undefined : result.message,
@@ -246,7 +235,7 @@ export class LoopRunner {
    * 执行单个任务
    */
   private async executeTask(taskId: string): Promise<RunOneResult> {
-    return await runRunOne(taskId, this.options.dryRun);
+    return await runRunOne({ taskId, dryRun: this.options.dryRun });
   }
 
   /**
@@ -309,6 +298,69 @@ export class LoopRunner {
       completedAt: completedAt.toISOString(),
       duration: 0,
     };
+  }
+
+  /**
+   * 选择下一个要执行的任务
+   */
+  private selectNextTask(
+    tasks: CodexPmTask[],
+    processedTaskIds: Set<string>,
+    scorer: TaskScorer
+  ): CodexPmTask | null {
+    const pendingTasks = tasks.filter(t => t.status === "pending");
+    
+    if (pendingTasks.length === 0) {
+      return null;
+    }
+
+    if (this.options.mode === "guided") {
+      return this.selectGuidedTask(pendingTasks, processedTaskIds);
+    }
+
+    return this.selectSmartTask(pendingTasks, processedTaskIds, scorer);
+  }
+
+  /**
+   * guided 模式：按优先级选择任务
+   */
+  private selectGuidedTask(
+    pendingTasks: CodexPmTask[],
+    processedTaskIds: Set<string>
+  ): CodexPmTask | null {
+    const availableTasks = pendingTasks.filter(t => !processedTaskIds.has(t.id));
+    
+    if (availableTasks.length === 0) {
+      return null;
+    }
+
+    availableTasks.sort((a, b) => {
+      if (b.priority !== a.priority) {
+        return b.priority - a.priority;
+      }
+      return (a.retry_count || 0) - (b.retry_count || 0);
+    });
+
+    return availableTasks[0];
+  }
+
+  /**
+   * smart 模式：使用评分器选择任务
+   */
+  private selectSmartTask(
+    pendingTasks: CodexPmTask[],
+    processedTaskIds: Set<string>,
+    scorer: TaskScorer
+  ): CodexPmTask | null {
+    const allScores = scorer.scoreAllTasks(pendingTasks);
+    const availableScores = allScores.filter(s => !processedTaskIds.has(s.task_id));
+    
+    if (availableScores.length === 0) {
+      return null;
+    }
+
+    const nextScore = availableScores[0];
+    return pendingTasks.find(t => t.id === nextScore.task_id) || null;
   }
 
   /**

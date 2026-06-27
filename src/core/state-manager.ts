@@ -1,11 +1,13 @@
 import * as fs from "fs";
+import * as path from "path";
 import type { ProjectState, DocIndexEntry, TaskRunEntry } from "../types/state.js";
 import type { CodexPmTask } from "../types/task.js";
 import type { MemoryRecord } from "../types/memory.js";
 import type { PmGenome } from "../types/genome.js";
-import { ensureDirectoryExists } from "./file-utils.js";
 import { normalizeTaskRunEntry } from "./result-writer.js";
+import { ensureDirectoryExists } from "./file-utils.js";
 
+const PACKAGE_VERSION = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf-8")).version;
 export class StateManager {
   private state: ProjectState | null = null;
   private docIndex: DocIndexEntry[] = [];
@@ -186,7 +188,7 @@ export class StateManager {
 
   private createEmptyState(): ProjectState {
     return {
-      version: "0.1.0",
+      version: PACKAGE_VERSION,
       project_id: `project-${Date.now()}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
